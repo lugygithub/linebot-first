@@ -9,6 +9,7 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import threading
 import datetime
 import time
+import os
 
 line_bot_api = LineBotApi('KjWVkMZ3K5vnTE4XHTf/VJWhyOTk03T2e5OoCeatsoCa9LQK7Y76rDlyoEl+9/wHD+x3p44HxsIG3KYNbWEDXWMiDa90Ip2oJgBqk8vMXJotJp6Gi0cVTOnzfiFLZd4CRJtdertC3nkV2Av0P2FrJgdB04t89/1O/w1cDnyilFU=')
 handler = WebhookHandler('5e3d684df6cfc85dfe9e03ae14bf235a')
@@ -95,12 +96,17 @@ class runningThread(threading.Thread):
         return {"example": logdate}
 
 
-
+@app.route("/getcwd")
+def getcwd():
+    print("current path: ", os.getcwd(), flush=True)
+    return "current path: " + os.getcwd()
 
 @app.route("/callback", methods=['POST'])
 def callback():
     signature = request.headers['X-Line-Signature']
-    body = request.get_data(as_text=True)
+    #body = request.get_data(as_text=True)
+    body = request.get_json()
+
     print("this is callback", flush=True)
     http_server = RunSearch()
     th = runningThread(http_server)
@@ -115,8 +121,46 @@ def callback():
 def handle_message(event):
     line_bot_api.reply_message(event.reply_token,TextSendMessage(text=event.message.text))
 
+################### use for postman TEST only #####################
+# can use postman to send post(got to set body data for username and password) to: http://127.0.0.1:5000/submit
+@app.route('/submit', methods=['POST'])
+def submit():
+    if request.method == "POST":
+        username = request.values['username']
+        password = request.values['password']
+        if username=='david' and password=='1234':
+            return '歡迎光臨本網站！'
+        else:
+            return '帳號或密碼錯誤！'
+
+#get the userID
+@app.route("/linebot", methods=['POST'])
+def linebot():
+    try:
+        data = request.get_json()
+        if not data:
+            return {"error": "Invalid JSON"}, 400
+        #crawlService.notify(f'{data}')
+        print("data is: ", data)
+        return {"message": "Data received", "data": data}
+    except Exception as e:
+        return {"error": str(e)}, 500
+ #https://vocus.cc/article/67be7413fd897800011fef50
+
+
+
+
+####################End Test #####################
+
+
+
 if __name__ == '__main__':
+    #render.com's free instance will shutdown automatically when it is inactive about 15~17 minutes.
     #http_server = RunSearch()
     #th = runningThread(http_server)
     #th.start() #->call run()
+    
+    # host = 0.0.0.0 表示無論本地位址或真實位址都能連上Falsh server。當網店開區完成時，要將host設為 0.0.0.0讓所有人都能瀏覽網站
+    #defaut value: # app.run(host='127.0.0.1', port = 5000, debug=false)
     app.run()
+    #app.run(debug = True)
