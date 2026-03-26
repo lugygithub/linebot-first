@@ -119,7 +119,7 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=event.source.userId))
+    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=event.source.user_id))
 
 ################### use for postman TEST only #####################
 # can use postman to send post(got to set body data for username and password) to: http://127.0.0.1:5000/submit
