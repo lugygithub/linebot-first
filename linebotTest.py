@@ -10,9 +10,12 @@ import threading
 import datetime
 import time
 import os
-
-line_bot_api = LineBotApi('KjWVkMZ3K5vnTE4XHTf/VJWhyOTk03T2e5OoCeatsoCa9LQK7Y76rDlyoEl+9/wHD+x3p44HxsIG3KYNbWEDXWMiDa90Ip2oJgBqk8vMXJotJp6Gi0cVTOnzfiFLZd4CRJtdertC3nkV2Av0P2FrJgdB04t89/1O/w1cDnyilFU=')
-handler = WebhookHandler('5e3d684df6cfc85dfe9e03ae14bf235a')
+#大冠鷲的機器人token
+#line_bot_api = LineBotApi('KjWVkMZ3K5vnTE4XHTf/VJWhyOTk03T2e5OoCeatsoCa9LQK7Y76rDlyoEl+9/wHD+x3p44HxsIG3KYNbWEDXWMiDa90Ip2oJgBqk8vMXJotJp6Gi0cVTOnzfiFLZd4CRJtdertC3nkV2Av0P2FrJgdB04t89/1O/w1cDnyilFU=')
+#handler = WebhookHandler('5e3d684df6cfc85dfe9e03ae14bf235a')
+#台灣特有種鳥_黃腹琉璃
+line_bot_api = LineBotApi('+KntHahgcVf9CPZeazx0NKXQFRsu3cWk2Ia8pveQcRz0e8Bp89BPBf/oI6i1fdc9YeHN8sW1zktHp42HPZOCeRJB0iZbJShkzJH/x353KwzlyT+db1hKg9yyZq3Fg926mHCBMWkDuHJqOn5Kb414lwdB04t89/1O/w1cDnyilFU=')
+handler = WebhookHandler('28dedebbd130f0a616c532466aaaa7e1')
 
 class RunSearch:
     def __init__(self):
