@@ -11,6 +11,9 @@ import datetime
 import time
 import os
 import requests
+import json
+
+LINEBOT_PUSH_API_URL = 'https://api.line.me/v2/bot/message/push'
 
 #大冠鷲的機器人
 ACCESS_TOKEN = 'KjWVkMZ3K5vnTE4XHTf/VJWhyOTk03T2e5OoCeatsoCa9LQK7Y76rDlyoEl+9/wHD+x3p44HxsIG3KYNbWEDXWMiDa90Ip2oJgBqk8vMXJotJp6Gi0cVTOnzfiFLZd4CRJtdertC3nkV2Av0P2FrJgdB04t89/1O/w1cDnyilFU='
@@ -147,7 +150,7 @@ def handle_message(event):
     
     # get the use id of somebody who joins the linebot and send it to my line account
     try:
-        response = requests.post(PUSH_API_URL, headers=headers, data=json.dumps(payload))
+        response = requests.post(LINEBOT_PUSH_API_URL, headers=headers, data=json.dumps(payload))
         response.raise_for_status()
         print('Push Message 傳送成功！')
     except requests.exceptions.RequestException as e:
