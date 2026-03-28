@@ -10,12 +10,20 @@ import threading
 import datetime
 import time
 import os
-#大冠鷲的機器人token
-#line_bot_api = LineBotApi('KjWVkMZ3K5vnTE4XHTf/VJWhyOTk03T2e5OoCeatsoCa9LQK7Y76rDlyoEl+9/wHD+x3p44HxsIG3KYNbWEDXWMiDa90Ip2oJgBqk8vMXJotJp6Gi0cVTOnzfiFLZd4CRJtdertC3nkV2Av0P2FrJgdB04t89/1O/w1cDnyilFU=')
-#handler = WebhookHandler('5e3d684df6cfc85dfe9e03ae14bf235a')
+import requests
+
+#大冠鷲的機器人
+ACCESS_TOKEN = 'KjWVkMZ3K5vnTE4XHTf/VJWhyOTk03T2e5OoCeatsoCa9LQK7Y76rDlyoEl+9/wHD+x3p44HxsIG3KYNbWEDXWMiDa90Ip2oJgBqk8vMXJotJp6Gi0cVTOnzfiFLZd4CRJtdertC3nkV2Av0P2FrJgdB04t89/1O/w1cDnyilFU='
+WEBHOOK_SECRET = '5e3d684df6cfc85dfe9e03ae14bf235a' #大冠鷲的機器人
+GUO_USER_ID = 'U98a0698b53411305cfac5ad1a111a775' #我的(大冠鷲的機器人user id)
+
 #台灣特有種鳥_黃腹琉璃
-line_bot_api = LineBotApi('+KntHahgcVf9CPZeazx0NKXQFRsu3cWk2Ia8pveQcRz0e8Bp89BPBf/oI6i1fdc9YeHN8sW1zktHp42HPZOCeRJB0iZbJShkzJH/x353KwzlyT+db1hKg9yyZq3Fg926mHCBMWkDuHJqOn5Kb414lwdB04t89/1O/w1cDnyilFU=')
-handler = WebhookHandler('28dedebbd130f0a616c532466aaaa7e1')
+#ACCESS_TOKEN = '+KntHahgcVf9CPZeazx0NKXQFRsu3cWk2Ia8pveQcRz0e8Bp89BPBf/oI6i1fdc9YeHN8sW1zktHp42HPZOCeRJB0iZbJShkzJH/x353KwzlyT+db1hKg9yyZq3Fg926mHCBMWkDuHJqOn5Kb414lwdB04t89/1O/w1cDnyilFU='
+#WEBHOOK_SECRET = '28dedebbd130f0a616c532466aaaa7e1' #台灣特有種鳥_黃腹琉璃
+#GUO_USER_ID = 'Udefd9b07997ca535ee61d89ac2489cb9' #我的(台灣特有種鳥_黃腹琉璃user id)
+
+line_bot_api = LineBotApi(ACCESS_TOKEN)
+handler = WebhookHandler(WEBHOOK_SECRET)
 
 class RunSearch:
     def __init__(self):
@@ -108,7 +116,7 @@ def getcwd():
 def callback():
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
-   # body = request.get_json()
+   # body = request.get_json() # body will be a python "dict", but not a json
 
     print("this is callback", flush=True)
     http_server = RunSearch()
@@ -122,7 +130,28 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=event.source.user_id))
+    #line_bot_api.reply_message(event.reply_token,TextSendMessage(text=event.source.user_id))
+    headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {ACCESS_TOKEN}'
+    }
+
+    payload = {
+        'to': GUO_USER_ID,
+        'messages': [
+            {'type': 'text',
+                'text': event.source.user_id
+            },
+         ]
+    }
+    
+    # get the use id of somebody who joins the linebot and send it to my line account
+    try:
+        response = requests.post(PUSH_API_URL, headers=headers, data=json.dumps(payload))
+        response.raise_for_status()
+        print('Push Message 傳送成功！')
+    except requests.exceptions.RequestException as e:
+        print('Push Message 傳送失敗：', e)
 
 ################### use for postman TEST only #####################
 # can use postman to send post(got to set body data for username and password) to: http://127.0.0.1:5000/submit
