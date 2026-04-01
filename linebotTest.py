@@ -5,6 +5,7 @@ from flask import request, abort
 from linebot import  LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import FollowEvent
 
 import threading
 import datetime
@@ -16,14 +17,14 @@ import json
 LINEBOT_PUSH_API_URL = 'https://api.line.me/v2/bot/message/push'
 
 #大冠鷲的機器人
-ACCESS_TOKEN = 'KjWVkMZ3K5vnTE4XHTf/VJWhyOTk03T2e5OoCeatsoCa9LQK7Y76rDlyoEl+9/wHD+x3p44HxsIG3KYNbWEDXWMiDa90Ip2oJgBqk8vMXJotJp6Gi0cVTOnzfiFLZd4CRJtdertC3nkV2Av0P2FrJgdB04t89/1O/w1cDnyilFU='
-WEBHOOK_SECRET = '5e3d684df6cfc85dfe9e03ae14bf235a' #大冠鷲的機器人
-GUO_USER_ID = 'U98a0698b53411305cfac5ad1a111a775' #我的(大冠鷲的機器人user id)
+#ACCESS_TOKEN = 'KjWVkMZ3K5vnTE4XHTf/VJWhyOTk03T2e5OoCeatsoCa9LQK7Y76rDlyoEl+9/wHD+x3p44HxsIG3KYNbWEDXWMiDa90Ip2oJgBqk8vMXJotJp6Gi0cVTOnzfiFLZd4CRJtdertC3nkV2Av0P2FrJgdB04t89/1O/w1cDnyilFU='
+#WEBHOOK_SECRET = '5e3d684df6cfc85dfe9e03ae14bf235a' #大冠鷲的機器人
+#GUO_USER_ID = 'U98a0698b53411305cfac5ad1a111a775' #我的(大冠鷲的機器人user id)
 
 #台灣特有種鳥_黃腹琉璃
-#ACCESS_TOKEN = '+KntHahgcVf9CPZeazx0NKXQFRsu3cWk2Ia8pveQcRz0e8Bp89BPBf/oI6i1fdc9YeHN8sW1zktHp42HPZOCeRJB0iZbJShkzJH/x353KwzlyT+db1hKg9yyZq3Fg926mHCBMWkDuHJqOn5Kb414lwdB04t89/1O/w1cDnyilFU='
-#WEBHOOK_SECRET = '28dedebbd130f0a616c532466aaaa7e1' #台灣特有種鳥_黃腹琉璃
-#GUO_USER_ID = 'Udefd9b07997ca535ee61d89ac2489cb9' #我的(台灣特有種鳥_黃腹琉璃user id)
+ACCESS_TOKEN = '+KntHahgcVf9CPZeazx0NKXQFRsu3cWk2Ia8pveQcRz0e8Bp89BPBf/oI6i1fdc9YeHN8sW1zktHp42HPZOCeRJB0iZbJShkzJH/x353KwzlyT+db1hKg9yyZq3Fg926mHCBMWkDuHJqOn5Kb414lwdB04t89/1O/w1cDnyilFU='
+WEBHOOK_SECRET = '28dedebbd130f0a616c532466aaaa7e1' #台灣特有種鳥_黃腹琉璃
+GUO_USER_ID = 'Udefd9b07997ca535ee61d89ac2489cb9' #我的(台灣特有種鳥_黃腹琉璃user id)
 
 line_bot_api = LineBotApi(ACCESS_TOKEN)
 handler = WebhookHandler(WEBHOOK_SECRET)
@@ -120,6 +121,7 @@ def callback():
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
    # body = request.get_json() # body will be a python "dict", but not a json
+   # body = request.json # is the same as request.get_json()
 
     print("this is callback", flush=True)
     http_server = RunSearch()
@@ -131,9 +133,15 @@ def callback():
         abort(400)
     return 'OK'
 
+'''
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     #line_bot_api.reply_message(event.reply_token,TextSendMessage(text=event.source.user_id))
+'''
+
+# when a user join/unblock the linebot
+@handler.add(FollowEvent)
+def handle_follow(event):
     headers = {
     'Content-Type': 'application/json',
     'Authorization': f'Bearer {ACCESS_TOKEN}'
@@ -143,8 +151,8 @@ def handle_message(event):
         'to': GUO_USER_ID,
         'messages': [
             {'type': 'text',
-                'text': event.source.user_id
-            },
+             'text': event.source.user_id
+            }
          ]
     }
     
@@ -155,6 +163,18 @@ def handle_message(event):
         print('Push Message 傳送成功！')
     except requests.exceptions.RequestException as e:
         print('Push Message 傳送失敗：', e)
+
+#When a user adds your bot, LINE sends:
+'''
+{
+  "type": "follow",
+  "source": {
+    "type": "user",
+    "userId": "Uxxxxxxxxxxxx"
+  }
+}
+'''
+
 
 ################### use for postman TEST only #####################
 # can use postman to send post(got to set body data for username and password) to: http://127.0.0.1:5000/submit
@@ -172,14 +192,19 @@ def submit():
 @app.route("/linebot", methods=['POST'])
 def linebot():
     try:
-        data = request.get_json()
+        data = request.get_json() # data will be a python dict, but not json
+        #json.dumps(data) # will get a json string
         if not data:
             return {"error": "Invalid JSON"}, 400
-        #crawlService.notify(f'{data}')
+        for event in body['events']:
+            if event['type'] == 'follow':
+                user_id = event['source']['userId']
+                print("User joined:", user_id)
         print("data is: ", data)
         return {"message": "Data received", "data": data}
     except Exception as e:
         return {"error": str(e)}, 500
+
  #https://vocus.cc/article/67be7413fd897800011fef50
 
 
